@@ -16,7 +16,7 @@ public class BudgetTrackerGUI extends JFrame {
     }
 
     private void initComponents() {
-        // Initialize Swing components
+        // initialize swing components
         budgetField = new JTextField(10);
         categoryField = new JTextField(10);
         expenseField = new JTextField(10);
@@ -26,7 +26,7 @@ public class BudgetTrackerGUI extends JFrame {
     }
 
     private void setupLayout() {
-        // Set up GUI layout
+        // gui layout
         setTitle("Budget Tracker");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new GridLayout(5, 2));
@@ -46,7 +46,7 @@ public class BudgetTrackerGUI extends JFrame {
     }
 
     private void setupListeners() {
-        // Add expense button listener
+        // add expense button listener
         addExpenseButton.addActionListener(e -> {
             try {
                 double budget = Double.parseDouble(budgetField.getText());
@@ -60,7 +60,7 @@ public class BudgetTrackerGUI extends JFrame {
                 Expense expense = new Expense(category, expenseAmount, new Date());
                 monthlyBudget.addExpense(expense);
 
-                // Show remaining budget
+                // show remaining budget
                 double remainingBudget = monthlyBudget.calculateRemainingBudget();
                 JOptionPane.showMessageDialog(this,
                         "Expense Added!\nRemaining Budget: $" + String.format("%.2f", remainingBudget));
@@ -74,7 +74,7 @@ public class BudgetTrackerGUI extends JFrame {
             }
         });
 
-        // View expenses button listener
+        // view expenses button listener
         viewExpensesButton.addActionListener(e -> {
             if (monthlyBudget == null || monthlyBudget.getExpenses().isEmpty()) {
                 JOptionPane.showMessageDialog(this,
@@ -82,7 +82,7 @@ public class BudgetTrackerGUI extends JFrame {
                 return;
             }
 
-            // Create table model for expenses
+            // create table model for expenses
             String[] columnNames = {"Date", "Category", "Amount"};
             Object[][] data = new Object[monthlyBudget.getExpenses().size()][3];
 
@@ -93,7 +93,7 @@ public class BudgetTrackerGUI extends JFrame {
                 data[i][2] = "$" + String.format("%.2f", expense.getAmount());
             }
 
-            // Create and show expenses table
+            // create and show expenses table
             JTable expensesTable = new JTable(data, columnNames);
             JScrollPane scrollPane = new JScrollPane(expensesTable);
             JOptionPane.showMessageDialog(

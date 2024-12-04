@@ -7,14 +7,14 @@ public class Expense {
     private double amount;
     private Date date;
 
-    // Constructor
+    // constructor
     public Expense(String category, double amount, Date date) {
         this.category = category;
         this.amount = amount;
         this.date = date;
     }
 
-    // Getters
+    // getters
     public String getCategory() {
         return category;
     }
