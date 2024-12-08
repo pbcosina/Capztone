@@ -10,7 +10,7 @@ public class FileHandler {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(BUDGET_FILE))) {
             writer.write(Double.toString(budget.getTotalBudget()));
             writer.newLine();
-            // Additional logic to save expenses
+            // additional logic to save expenses
         }
     }
 
@@ -18,8 +18,8 @@ public class FileHandler {
     public static Budget loadBudgetData() throws IOException {
         try (BufferedReader reader = new BufferedReader(new FileReader(BUDGET_FILE))) {
             double totalBudget = Double.parseDouble(reader.readLine());
-            // Additional logic to load expenses
-            return null; // Placeholder
+            // additional logic to load expenses
+            return null;
         }
     }
 }
