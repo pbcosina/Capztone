@@ -31,10 +31,11 @@ public class BudgetTrackerGUI extends JFrame {
         setTitle("Trackify");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        setSize(600, 400); // Width: 600, Height: 400
-        setLocationRelativeTo(null); // Center the frame on the screen
+        setSize(600, 400);
+        setLocationRelativeTo(null);
 
         ttrackify.setPreferredSize(new Dimension(600, 450));
+        setResizable(false);
         budgetField.setPreferredSize(new Dimension(250, 40));
         categoryField.setPreferredSize(new Dimension(250, 40));
         expenseField.setPreferredSize(new Dimension(250, 40));
@@ -75,7 +76,7 @@ public class BudgetTrackerGUI extends JFrame {
                 // if remaining budget is zero after adding this expense
                 if (remainingBudget <= 0) {
                     JOptionPane.showMessageDialog(this,
-                            "justiiiinnnn, san tayo nagpunta nung monday",
+                            "You must stay within the allotted budget.",
                             "Budget Exhausted",
                             JOptionPane.WARNING_MESSAGE);
                 } else {
