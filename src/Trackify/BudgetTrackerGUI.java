@@ -7,12 +7,11 @@ import java.util.Date;
 
 public class BudgetTrackerGUI extends JFrame {
     private JTextField budgetField, categoryField, expenseField;
-    private JButton addExpenseButton, viewExpensesButton, resetButton, remainingBudgetButton; // Step 1: Declare Remaining Budget Button
+    private JButton addExpenseButton, viewExpensesButton, resetButton, remainingBudgetButton;
     private MonthlyBudget monthlyBudget;
     private boolean budgetSet = false;
 
     public BudgetTrackerGUI() {
-        // Set a modern look and feel
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
@@ -25,21 +24,20 @@ public class BudgetTrackerGUI extends JFrame {
     }
 
     private void initComponents() {
-        // Styled components
         budgetField = createStyledTextField();
         categoryField = createStyledTextField();
         expenseField = createStyledTextField();
 
         addExpenseButton = createStyledButton("Add Expense", Color.pink);
         viewExpensesButton = createStyledButton("View Expenses", Color.pink);
-        resetButton = createStyledButton("Reset", Color.pink); // Step 2: Initialize Reset Button
-        remainingBudgetButton = createStyledButton("See Remaining Budget", Color.pink); // Step 3: Initialize Remaining Budget Button
+        resetButton = createStyledButton("Reset", Color.pink);
+        remainingBudgetButton = createStyledButton("See Remaining Budget", Color.pink);
     }
 
     private JTextField createStyledTextField() {
         JTextField textField = new JTextField(10);
         textField.setFont(new Font("Arial", Font.PLAIN, 14));
-        textField.setForeground(Color.PINK); // Set text color to pink
+        textField.setForeground(Color.PINK);
         textField.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.pink, 1),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)
@@ -51,25 +49,22 @@ public class BudgetTrackerGUI extends JFrame {
         JButton button = new JButton(text);
         button.setFont(new Font("Arial", Font.BOLD, 14));
         button.setBackground(bgColor);
-        button.setForeground(Color.pink); // Changed to pink for better contrast
+        button.setForeground(Color.pink);
         button.setFocusPainted(false);
         button.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
         return button;
     }
 
     private void setupLayout() {
-        // Use a more sophisticated layout
         setTitle("Trackify");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        // Main panel with better spacing
         JPanel mainPanel = new JPanel(new GridBagLayout());
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Add components with GridBagLayout
         gbc.gridx = 0;
         gbc.gridy = 0;
         mainPanel.add(createLabel("Total Budget:"), gbc);
@@ -94,20 +89,17 @@ public class BudgetTrackerGUI extends JFrame {
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.gridwidth = 2;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        mainPanel.add(addExpenseButton, gbc); // Add Expense Button
+        mainPanel.add(addExpenseButton, gbc);
 
         gbc.gridy = 4;
-        mainPanel.add(viewExpensesButton, gbc); // View Expenses Button
+        mainPanel.add(viewExpensesButton, gbc);
 
         gbc.gridy = 5;
-        mainPanel.add(resetButton, gbc); // Step 4: Add Reset Button
+        mainPanel.add(remainingBudgetButton, gbc);
 
         gbc.gridy = 6;
-        mainPanel.add(remainingBudgetButton, gbc); // Step 5: Add Remaining Budget Button
+        mainPanel.add(resetButton, gbc);
 
-        // Add main panel to frame
         add(mainPanel);
         pack();
         setLocationRelativeTo(null);
@@ -117,37 +109,77 @@ public class BudgetTrackerGUI extends JFrame {
     private JLabel createLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(new Font("Arial", Font.BOLD, 14));
-        label.setForeground(Color.PINK); // Set text color to pink
+        label.setForeground(Color.PINK);
         return label;
     }
 
     private void setupListeners() {
-        // Add expense button listener (same as previous implementation)
         addExpenseButton.addActionListener(e -> {
             try {
-                // If budget hasn't been set, set the budget
                 if (!budgetSet) {
                     double budget = Double.parseDouble(budgetField.getText());
+                    if (budget <= 0) {
+                        JOptionPane.showMessageDialog(this,
+                                "Budget must be greater than 0 to proceed.",
+                                "Invalid Budget",
+                                JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
                     monthlyBudget = new MonthlyBudget(budget);
                     budgetField.setEditable(false);
                     budgetSet = true;
                 }
 
-                // Proceed with adding expense
+                double remainingBudget = monthlyBudget.calculateRemainingBudget();
+                if (remainingBudget <= 0) {
+                    JOptionPane.showMessageDialog(this,
+                            "No remaining budget available. You cannot add more expenses.",
+                            "Budget Exceeded",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
                 String category = categoryField.getText();
                 double expenseAmount = Double.parseDouble(expenseField.getText());
+
+                if (expenseAmount <= 0) {
+                    JOptionPane.showMessageDialog(this,
+                            "Expense amount must be greater than 0.",
+                            "Invalid Expense Amount",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                if (expenseAmount > remainingBudget) {
+                    JOptionPane.showMessageDialog(this,
+                            "Expense exceeds the remaining budget. Please adjust the amount.",
+                            "Insufficient Budget",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
 
                 Expense expense = new Expense(category, expenseAmount, new Date());
                 monthlyBudget.addExpense(expense);
 
-                // show remaining budget
-                double remainingBudget = monthlyBudget.calculateRemainingBudget();
-                JOptionPane.showMessageDialog(this,
-                        "Expense Added!\nRemaining Budget: ₱" + String.format("%.2f", remainingBudget),
-                        "Expense Recorded",
-                        JOptionPane.INFORMATION_MESSAGE);
+                remainingBudget = monthlyBudget.calculateRemainingBudget();
+                if (remainingBudget == 0) {
+                    JOptionPane.showMessageDialog(this,
+                            "Your budget has been fully exhausted.",
+                            "Budget Exhausted",
+                            JOptionPane.INFORMATION_MESSAGE);
 
-                // Clear category and expense fields
+                    // Clear the total budget field and reset the state
+                    budgetField.setText("");
+                    budgetField.setEditable(true);
+                    budgetSet = false;
+                    monthlyBudget = null;
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            "Expense Added!\nRemaining Budget: ₱" + String.format("%.2f", remainingBudget),
+                            "Expense Recorded",
+                            JOptionPane.INFORMATION_MESSAGE);
+                }
+
                 categoryField.setText("");
                 expenseField.setText("");
 
@@ -164,7 +196,6 @@ public class BudgetTrackerGUI extends JFrame {
             }
         });
 
-        // view expenses button listener
         viewExpensesButton.addActionListener(e -> {
             if (!budgetSet) {
                 JOptionPane.showMessageDialog(this,
@@ -182,7 +213,6 @@ public class BudgetTrackerGUI extends JFrame {
                 return;
             }
 
-            // create table model for expenses
             String[] columnNames = {"Date", "Category", "Amount"};
             Object[][] data = new Object[monthlyBudget.getExpenses().size()][3];
 
@@ -193,7 +223,6 @@ public class BudgetTrackerGUI extends JFrame {
                 data[i][2] = "₱" + String.format("%.2f", expense.getAmount());
             }
 
-            // create and show expenses table
             JTable expensesTable = new JTable(new DefaultTableModel(data, columnNames) {
                 @Override
                 public boolean isCellEditable(int row, int column) {
@@ -201,7 +230,6 @@ public class BudgetTrackerGUI extends JFrame {
                 }
             });
 
-            // Style the table
             expensesTable.setFont(new Font("Arial", Font.PLAIN, 12));
             expensesTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
             expensesTable.setRowHeight(25);
@@ -217,16 +245,14 @@ public class BudgetTrackerGUI extends JFrame {
             );
         });
 
-        // Step 3: Add action listener for reset button
         resetButton.addActionListener(e -> {
-            budgetSet = false; // Reset flag
-            monthlyBudget = null; // Clear monthly budget
+            budgetSet = false;
+            monthlyBudget = null;
 
-            // Clear fields
             budgetField.setText("");
             categoryField.setText("");
             expenseField.setText("");
-            budgetField.setEditable(true); // Make budget field editable again
+            budgetField.setEditable(true);
 
             JOptionPane.showMessageDialog(this,
                     "All data has been reset.",
@@ -234,7 +260,6 @@ public class BudgetTrackerGUI extends JFrame {
                     JOptionPane.INFORMATION_MESSAGE);
         });
 
-        // Step 5: Add action listener for remaining budget button
         remainingBudgetButton.addActionListener(e -> {
             if (!budgetSet) {
                 JOptionPane.showMessageDialog(this,
