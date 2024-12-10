@@ -1,18 +1,38 @@
 package Trackify;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class MonthlyBudget extends Budget {
+public class MonthlyBudget {
+    private double totalBudget;
+    private List<Expense> expenses;
+
     public MonthlyBudget(double totalBudget) {
         this.totalBudget = totalBudget;
         this.expenses = new ArrayList<>();
     }
 
-    @Override
+    public double getTotalBudget() {
+        return totalBudget;
+    }
+
+    public void addBudget(double additionalBudget) {
+        totalBudget += additionalBudget;
+    }
+
     public double calculateRemainingBudget() {
-        double totalExpenses = expenses.stream()
-                .mapToDouble(Expense::getAmount)
-                .sum();
+        double totalExpenses = 0;
+        for (Expense expense : expenses) {
+            totalExpenses += expense.getAmount();
+        }
         return totalBudget - totalExpenses;
+    }
+
+    public void addExpense(Expense expense) {
+        expenses.add(expense);
+    }
+
+    public List<Expense> getExpenses() {
+        return expenses;
     }
 }
