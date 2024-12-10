@@ -56,10 +56,10 @@ public class BudgetTrackerGUI extends JFrame {
                     budgetSet = true;
                 }
 
-                // checks if the remaining budget is already zero
+                // Check if the remaining budget is already zero
                 if (monthlyBudget.calculateRemainingBudget() <= 0) {
                     JOptionPane.showMessageDialog(this,
-                            "justiiiinnnn, san tayo nagpunta nung monday",
+                            "You have no budget left.",
                             "No Budget Left",
                             JOptionPane.WARNING_MESSAGE);
                     return;
@@ -68,23 +68,23 @@ public class BudgetTrackerGUI extends JFrame {
                 String category = categoryField.getText();
                 double expenseAmount = Double.parseDouble(expenseField.getText());
 
+                // Ensure expense does not exceed remaining budget
+                if (monthlyBudget.calculateRemainingBudget() < expenseAmount) {
+                    JOptionPane.showMessageDialog(this,
+                            "Expense exceeds remaining budget.",
+                            "Exceeds Budget",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
                 Expense expense = new Expense(category, expenseAmount, new Date());
                 monthlyBudget.addExpense(expense);
 
                 double remainingBudget = monthlyBudget.calculateRemainingBudget();
-
-                // if remaining budget is zero after adding this expense
-                if (remainingBudget <= 0) {
-                    JOptionPane.showMessageDialog(this,
-                            "You must stay within the allotted budget.",
-                            "Budget Exhausted",
-                            JOptionPane.WARNING_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(this,
-                            "Expense Added!\nRemaining Budget: ₱" + String.format("%.2f", remainingBudget),
-                            "Expense Recorded",
-                            JOptionPane.INFORMATION_MESSAGE);
-                }
+                JOptionPane.showMessageDialog(this,
+                        "Expense Added!\nRemaining Budget: ₱" + String.format("%.2f", remainingBudget),
+                        "Expense Recorded",
+                        JOptionPane.INFORMATION_MESSAGE);
 
                 categoryField.setText("");
                 expenseField.setText("");
@@ -94,11 +94,6 @@ public class BudgetTrackerGUI extends JFrame {
                         "Invalid input. Please enter valid numbers.",
                         "Input Error",
                         JOptionPane.ERROR_MESSAGE);
-            } catch (BudgetException ex) {
-                JOptionPane.showMessageDialog(this,
-                        ex.getMessage(),
-                        "Budget Error",
-                        JOptionPane.WARNING_MESSAGE);
             }
         });
 
@@ -119,7 +114,7 @@ public class BudgetTrackerGUI extends JFrame {
                 return;
             }
 
-            // create table model for expenses
+            // Create table model for expenses
             String[] columnNames = {"Date", "Category", "Amount"};
             Object[][] data = new Object[monthlyBudget.getExpenses().size()][3];
 
