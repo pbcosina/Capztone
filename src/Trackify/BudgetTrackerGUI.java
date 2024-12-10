@@ -31,7 +31,7 @@ public class BudgetTrackerGUI extends JFrame {
         setTitle("Trackify");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        setSize(600, 450);
+        setSize(600, 400);
         setLocationRelativeTo(null);
 
         ttrackify.setPreferredSize(new Dimension(600, 450));
@@ -56,9 +56,10 @@ public class BudgetTrackerGUI extends JFrame {
                     budgetSet = true;
                 }
 
+                // checks if the remaining budget is already zero
                 if (monthlyBudget.calculateRemainingBudget() <= 0) {
                     JOptionPane.showMessageDialog(this,
-                            "You've exhausted your entire budget.",
+                            "justiiiinnnn, san tayo nagpunta nung monday",
                             "No Budget Left",
                             JOptionPane.WARNING_MESSAGE);
                     return;
@@ -67,43 +68,37 @@ public class BudgetTrackerGUI extends JFrame {
                 String category = categoryField.getText();
                 double expenseAmount = Double.parseDouble(expenseField.getText());
 
-                if (expenseAmount > monthlyBudget.calculateRemainingBudget()) {
+                Expense expense = new Expense(category, expenseAmount, new Date());
+                monthlyBudget.addExpense(expense);
+
+                double remainingBudget = monthlyBudget.calculateRemainingBudget();
+
+                // if remaining budget is zero after adding this expense
+                if (remainingBudget <= 0) {
                     JOptionPane.showMessageDialog(this,
-                            "You must stay within the allotted budget. Reduce your expense amount.",
-                            "Exceeded Budget",
+                            "You must stay within the allotted budget.",
+                            "Budget Exhausted",
                             JOptionPane.WARNING_MESSAGE);
                 } else {
-                    try {
-                        monthlyBudget.addExpense(new Expense(category, expenseAmount, new Date()));
-
-                        double remainingBudget = monthlyBudget.calculateRemainingBudget();
-
-                        if (remainingBudget == 0) {
-                            JOptionPane.showMessageDialog(this,
-                                    "You've used up your entire budget.\nRemaining Budget: ₱" + String.format("%.2f", remainingBudget),
-                                    "Budget Exhausted",
-                                    JOptionPane.WARNING_MESSAGE);
-                        } else {
-                            JOptionPane.showMessageDialog(this,
-                                    "Expense Added!\nRemaining Budget: ₱" + String.format("%.2f", remainingBudget),
-                                    "Expense Recorded",
-                                    JOptionPane.INFORMATION_MESSAGE);
-                        }
-
-                        categoryField.setText("");
-                        expenseField.setText("");
-                    } catch (BudgetException ex) {
-                        JOptionPane.showMessageDialog(this,
-                                ex.getMessage(),
-                                "Budget Error",
-                                JOptionPane.WARNING_MESSAGE);
-                    }
+                    JOptionPane.showMessageDialog(this,
+                            "Expense Added!\nRemaining Budget: ₱" + String.format("%.2f", remainingBudget),
+                            "Expense Recorded",
+                            JOptionPane.INFORMATION_MESSAGE);
                 }
+
+                categoryField.setText("");
+                expenseField.setText("");
+
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this,
                         "Invalid input. Please enter valid numbers.",
                         "Input Error",
                         JOptionPane.ERROR_MESSAGE);
+            } catch (BudgetException ex) {
+                JOptionPane.showMessageDialog(this,
+                        ex.getMessage(),
+                        "Budget Error",
+                        JOptionPane.WARNING_MESSAGE);
             }
         });
 
@@ -124,7 +119,7 @@ public class BudgetTrackerGUI extends JFrame {
                 return;
             }
 
-            // table
+            // create table model for expenses
             String[] columnNames = {"Date", "Category", "Amount"};
             Object[][] data = new Object[monthlyBudget.getExpenses().size()][3];
 
