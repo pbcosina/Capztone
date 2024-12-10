@@ -1,6 +1,7 @@
 package Trackify;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 
 public class IntroScreen extends JFrame {
@@ -12,10 +13,12 @@ public class IntroScreen extends JFrame {
         setContentPane(panel);
         setTitle("Welcome to Trackify");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 300);
+        setSize(600, 400);
         setLocationRelativeTo(null);
 
-        // attach event listeners
+        setPreferredSize(new Dimension(600, 450));
+        setResizable(false);
+
         startButton.addActionListener(this::startProgram);
         setVisible(true);
     }
