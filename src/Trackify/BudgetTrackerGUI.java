@@ -51,34 +51,91 @@ public class BudgetTrackerGUI extends JFrame {
             try {
                 if (!budgetSet) {
                     double budget = Double.parseDouble(budgetField.getText());
+                    if (budget <= 0) {
+                        JOptionPane.showMessageDialog(this,
+                                "Budget must be greater than 0.",
+                                "Invalid Budget",
+                                JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
                     monthlyBudget = new MonthlyBudget(budget);
                     budgetField.setEditable(false);
                     budgetSet = true;
                 }
 
-                // checks if the remaining budget is already zero
+                // Check if the remaining budget is zero
                 if (monthlyBudget.calculateRemainingBudget() <= 0) {
                     JOptionPane.showMessageDialog(this,
-                            "justiiiinnnn, san tayo nagpunta nung monday",
-                            "No Budget Left",
-                            JOptionPane.WARNING_MESSAGE);
+                            "No remaining budget available. Budget will be reset.",
+                            "Budget Exhausted",
+                            JOptionPane.INFORMATION_MESSAGE);
+                    resetBudget();  // Automatically reset if budget is exhausted
                     return;
                 }
 
                 String category = categoryField.getText();
                 double expenseAmount = Double.parseDouble(expenseField.getText());
 
+                if (expenseAmount <= 0) {
+                    throw new BudgetException("Expense amount must be greater than 0.");
+                }
+
+                if (expenseAmount > monthlyBudget.calculateRemainingBudget()) {
+                    JOptionPane.showMessageDialog(this,
+                            "Expense exceeds the remaining budget. Please adjust the amount.",
+                            "Exceeds Budget",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
                 Expense expense = new Expense(category, expenseAmount, new Date());
                 monthlyBudget.addExpense(expense);
 
                 double remainingBudget = monthlyBudget.calculateRemainingBudget();
 
-                // if remaining budget is zero after adding this expense
-                if (remainingBudget <= 0) {
+                if (remainingBudget == 0) {
                     JOptionPane.showMessageDialog(this,
-                            "You must stay within the allotted budget.",
+                            "Budget fully exhausted. Budget will be reset.",
                             "Budget Exhausted",
+                            JOptionPane.INFORMATION_MESSAGE);
+                    resetBudget();  // Automatically reset if budget reaches zero
+                } else if (remainingBudget < 10) {
+                    int option = JOptionPane.showConfirmDialog(this,
+                            "Your remaining budget is below ₱10. Would you like to add more budget?",
+                            "Low Budget Warning",
+                            JOptionPane.YES_NO_OPTION,
                             JOptionPane.WARNING_MESSAGE);
+
+                    if (option == JOptionPane.YES_OPTION) {
+                        String additionalBudgetInput = JOptionPane.showInputDialog(this,
+                                "Enter the additional budget amount:",
+                                "Add Budget",
+                                JOptionPane.QUESTION_MESSAGE);
+
+                        try {
+                            double additionalBudget = Double.parseDouble(additionalBudgetInput);
+                            if (additionalBudget > 0) {
+                                monthlyBudget.addBudget(additionalBudget);
+                                // Update the budgetField with the new total budget
+                                budgetField.setText(String.format("%.2f", monthlyBudget.getTotalBudget()));
+                                JOptionPane.showMessageDialog(this,
+                                        "Budget successfully increased! Remaining Budget: ₱" +
+                                                String.format("%.2f", monthlyBudget.calculateRemainingBudget()),
+                                        "Budget Updated",
+                                        JOptionPane.INFORMATION_MESSAGE);
+                            } else {
+                                JOptionPane.showMessageDialog(this,
+                                        "Additional budget must be greater than 0.",
+                                        "Invalid Input",
+                                        JOptionPane.WARNING_MESSAGE);
+                            }
+                        } catch (NumberFormatException ex) {
+                            JOptionPane.showMessageDialog(this,
+                                    "Invalid input. Please enter a valid number.",
+                                    "Input Error",
+                                    JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
                 } else {
                     JOptionPane.showMessageDialog(this,
                             "Expense Added!\nRemaining Budget: ₱" + String.format("%.2f", remainingBudget),
@@ -119,7 +176,6 @@ public class BudgetTrackerGUI extends JFrame {
                 return;
             }
 
-            // create table model for expenses
             String[] columnNames = {"Date", "Category", "Amount"};
             Object[][] data = new Object[monthlyBudget.getExpenses().size()][3];
 
@@ -139,20 +195,7 @@ public class BudgetTrackerGUI extends JFrame {
                     JOptionPane.PLAIN_MESSAGE);
         });
 
-        resetButton.addActionListener(e -> {
-            budgetSet = false;
-            monthlyBudget = null;
-
-            budgetField.setText("");
-            categoryField.setText("");
-            expenseField.setText("");
-            budgetField.setEditable(true);
-
-            JOptionPane.showMessageDialog(this,
-                    "All data has been reset.",
-                    "Reset Successful",
-                    JOptionPane.INFORMATION_MESSAGE);
-        });
+        resetButton.addActionListener(e -> resetBudget());
 
         remainingBudgetButton.addActionListener(e -> {
             if (!budgetSet) {
@@ -164,10 +207,63 @@ public class BudgetTrackerGUI extends JFrame {
             }
 
             double remainingBudget = monthlyBudget.calculateRemainingBudget();
-            JOptionPane.showMessageDialog(this,
-                    "Remaining Budget: ₱" + String.format("%.2f", remainingBudget),
+            int option = JOptionPane.showConfirmDialog(this,
+                    "Remaining Budget: ₱" + String.format("%.2f", remainingBudget) +
+                            "\nWould you like to add more to your budget?",
                     "Remaining Budget",
+                    JOptionPane.YES_NO_OPTION,
                     JOptionPane.INFORMATION_MESSAGE);
+
+            if (option == JOptionPane.YES_OPTION) {
+                String additionalBudgetInput = JOptionPane.showInputDialog(this,
+                        "Enter the additional budget amount:",
+                        "Add Budget",
+                        JOptionPane.QUESTION_MESSAGE);
+
+                try {
+                    double additionalBudget = Double.parseDouble(additionalBudgetInput);
+                    if (additionalBudget > 0) {
+                        monthlyBudget.addBudget(additionalBudget);
+                        // Update the budgetField with the new total budget
+                        budgetField.setText(String.format("%.2f", monthlyBudget.getTotalBudget()));
+                        JOptionPane.showMessageDialog(this,
+                                "Budget successfully increased! Remaining Budget: ₱" +
+                                        String.format("%.2f", monthlyBudget.calculateRemainingBudget()),
+                                "Budget Updated",
+                                JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(this,
+                                "Additional budget must be greater than 0.",
+                                "Invalid Input",
+                                JOptionPane.WARNING_MESSAGE);
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this,
+                            "Invalid input. Please enter a valid number.",
+                            "Input Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Remaining Budget: ₱" + String.format("%.2f", remainingBudget),
+                        "Remaining Budget",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
         });
+    }
+
+    private void resetBudget() {
+        budgetSet = false;
+        monthlyBudget = null;
+
+        budgetField.setText("");
+        categoryField.setText("");
+        expenseField.setText("");
+        budgetField.setEditable(true);
+
+        JOptionPane.showMessageDialog(this,
+                "All data has been reset.",
+                "Reset Successful",
+                JOptionPane.INFORMATION_MESSAGE);
     }
 }
