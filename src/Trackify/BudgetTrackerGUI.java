@@ -140,13 +140,7 @@ public class BudgetTrackerGUI extends JFrame {
                 return;
             }
 
-            if (DailyBudget.getExpenses().isEmpty()) {
-                JOptionPane.showMessageDialog(this,
-                        "No expenses to display. Add some expenses first!",
-                        "No Expenses",
-                        JOptionPane.INFORMATION_MESSAGE);
-                return;
-            }
+
 
             String[] columnNames = {"Date", "Category", "Amount"};
             Object[][] data = new Object[DailyBudget.getExpenses().size()][3];

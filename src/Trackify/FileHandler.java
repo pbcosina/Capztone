@@ -2,7 +2,7 @@ package Trackify;
 
 import java.io.*;
 
-public class FileHandler {
+public class  FileHandler {
     private static final String BUDGET_FILE = "budget_data.txt";
 
     public static void saveBudgetData(Budget budget) throws IOException {
