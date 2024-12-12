@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 
 public class IntroScreen extends JFrame {
-    private JPanel panel; // root panel linked to .form
+    private JPanel panel;
     private JLabel titleLabel;
     private JButton startButton;
 
@@ -25,7 +25,7 @@ public class IntroScreen extends JFrame {
 
     private void startProgram(ActionEvent e) {
         dispose();
-        SwingUtilities.invokeLater(BudgetTrackerGUI::new); //
+        SwingUtilities.invokeLater(BudgetTrackerGUI::new);
     }
 
     public static void main(String[] args) {

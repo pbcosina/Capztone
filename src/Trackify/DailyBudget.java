@@ -3,11 +3,11 @@ package Trackify;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MonthlyBudget {
+public class DailyBudget {
     private double totalBudget;
     private List<Expense> expenses;
 
-    public MonthlyBudget(double totalBudget) {
+    public DailyBudget(double totalBudget) {
         this.totalBudget = totalBudget;
         this.expenses = new ArrayList<>();
     }

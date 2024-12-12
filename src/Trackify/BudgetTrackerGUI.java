@@ -17,7 +17,7 @@ public class BudgetTrackerGUI extends JFrame {
     private JLabel category;
     private JLabel budget;
 
-    private MonthlyBudget monthlyBudget;
+    private DailyBudget DailyBudget;
     private boolean budgetSet = false;
 
     public BudgetTrackerGUI() {
@@ -50,26 +50,60 @@ public class BudgetTrackerGUI extends JFrame {
         addExpenseButton.addActionListener(e -> {
             try {
                 if (!budgetSet) {
-                    double budget = Double.parseDouble(budgetField.getText());
-                    monthlyBudget = new MonthlyBudget(budget);
-                    budgetField.setEditable(false);
-                    budgetSet = true;
+                    String budgetInput = budgetField.getText().trim();
+                    if (budgetInput.isEmpty()) {
+                        JOptionPane.showMessageDialog(this,
+                                "Set budget first!",
+                                "Budget Not Set",
+                                JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+
+                    try {
+                        double budget = Double.parseDouble(budgetInput);
+                        DailyBudget = new DailyBudget(budget);
+                        budgetField.setEditable(false);
+                        budgetSet = true;
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(this,
+                                "Invalid budget input. Please enter a valid number.",
+                                "Input Error",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
                 }
 
-                // Check if the remaining budget is already zero
-                if (monthlyBudget.calculateRemainingBudget() <= 0) {
+                if (DailyBudget.calculateRemainingBudget() <= 0) {
                     JOptionPane.showMessageDialog(this,
                             "You have no budget left.",
-                            "No Budget Left",
+                            "Budget Exhausted",
                             JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
-                String category = categoryField.getText();
-                double expenseAmount = Double.parseDouble(expenseField.getText());
+                // if empty category
+                String category = categoryField.getText().trim();
+                if (category.isEmpty()) {
+                    JOptionPane.showMessageDialog(this,
+                            "Input required: Please enter a category.",
+                            "Category Missing",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
 
-                // Ensure expense does not exceed remaining budget
-                if (monthlyBudget.calculateRemainingBudget() < expenseAmount) {
+                // if empty expense
+                String expenseInput = expenseField.getText().trim();
+                if (expenseInput.isEmpty()) {
+                    JOptionPane.showMessageDialog(this,
+                            "Input required: Please enter an expense amount.",
+                            "Expense Missing",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                double expenseAmount = Double.parseDouble(expenseInput);
+
+                if (DailyBudget.calculateRemainingBudget() < expenseAmount) {
                     JOptionPane.showMessageDialog(this,
                             "Expense exceeds remaining budget.",
                             "Exceeds Budget",
@@ -78,9 +112,9 @@ public class BudgetTrackerGUI extends JFrame {
                 }
 
                 Expense expense = new Expense(category, expenseAmount, new Date());
-                monthlyBudget.addExpense(expense);
+                DailyBudget.addExpense(expense);
 
-                double remainingBudget = monthlyBudget.calculateRemainingBudget();
+                double remainingBudget = DailyBudget.calculateRemainingBudget();
                 JOptionPane.showMessageDialog(this,
                         "Expense Added!\nRemaining Budget: ₱" + String.format("%.2f", remainingBudget),
                         "Expense Recorded",
@@ -106,7 +140,7 @@ public class BudgetTrackerGUI extends JFrame {
                 return;
             }
 
-            if (monthlyBudget.getExpenses().isEmpty()) {
+            if (DailyBudget.getExpenses().isEmpty()) {
                 JOptionPane.showMessageDialog(this,
                         "No expenses to display. Add some expenses first!",
                         "No Expenses",
@@ -114,12 +148,11 @@ public class BudgetTrackerGUI extends JFrame {
                 return;
             }
 
-            // Create table model for expenses
             String[] columnNames = {"Date", "Category", "Amount"};
-            Object[][] data = new Object[monthlyBudget.getExpenses().size()][3];
+            Object[][] data = new Object[DailyBudget.getExpenses().size()][3];
 
-            for (int i = 0; i < monthlyBudget.getExpenses().size(); i++) {
-                Expense expense = monthlyBudget.getExpenses().get(i);
+            for (int i = 0; i < DailyBudget.getExpenses().size(); i++) {
+                Expense expense = DailyBudget.getExpenses().get(i);
                 data[i][0] = expense.getDate().toString();
                 data[i][1] = expense.getCategory();
                 data[i][2] = "₱" + String.format("%.2f", expense.getAmount());
@@ -136,7 +169,7 @@ public class BudgetTrackerGUI extends JFrame {
 
         resetButton.addActionListener(e -> {
             budgetSet = false;
-            monthlyBudget = null;
+            DailyBudget = null;
 
             budgetField.setText("");
             categoryField.setText("");
@@ -158,7 +191,7 @@ public class BudgetTrackerGUI extends JFrame {
                 return;
             }
 
-            double remainingBudget = monthlyBudget.calculateRemainingBudget();
+            double remainingBudget = DailyBudget.calculateRemainingBudget();
             JOptionPane.showMessageDialog(this,
                     "Remaining Budget: ₱" + String.format("%.2f", remainingBudget),
                     "Remaining Budget",
